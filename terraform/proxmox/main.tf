@@ -1,42 +1,42 @@
-# resource "proxmox_vm_qemu" "pfsense" {
-#     target_node = "pve"
-#     desc = "Pfsense Gateway"
-#     vmid = 106
-#     count = 1
-#     onboot = true
-#     agent = 0
-#     cores = 1
-#     sockets = 1
-#     numa = false
-#     vcpus = 0
-#     cpu = "host"
-#     memory = 1024
-#     name = "pfsense-node-0${count.index + 1}"
-#     iso = "local:iso/pfSense-CE-2.7.2-RELEASE-amd64.iso"
-#     scsihw   = "virtio-scsi-single" 
-#     bootdisk = "scsi0"
+resource "proxmox_vm_qemu" "pfsense" {
+    target_node = "pve"
+    desc = "Pfsense Gateway"
+    vmid = 106
+    count = 1
+    onboot = true
+    agent = 0
+    cores = 1
+    sockets = 1
+    numa = false
+    vcpus = 0
+    cpu = "host"
+    memory = 1024
+    name = "pfsense-node-0${count.index + 1}"
+    iso = "local:iso/pfSense-CE-2.7.2-RELEASE-amd64.iso"
+    scsihw   = "virtio-scsi-single" 
+    bootdisk = "scsi0"
 
-#     disks {
-#         scsi {
-#             scsi0 {
-#                 disk {
-#                   storage = "local"
-#                   size = 22
-#                 }
-#             }
-#         }
-#     }
+    disks {
+        scsi {
+            scsi0 {
+                disk {
+                  storage = "local"
+                  size = 22
+                }
+            }
+        }
+    }
 
-#     network {
-#         bridge    = "vmbr0"
-#         firewall  = false
-#         link_down = false
-#         model     = "virtio"
-#         tag       = 3
-#         queues    = 8
-#     }
+    network {
+        bridge    = "vmbr0"
+        firewall  = false
+        link_down = false
+        model     = "virtio"
+        tag       = 3
+        queues    = 8
+    }
 
-# }
+}
 
 resource "proxmox_vm_qemu" "cloudinit-nginx" {
     target_node = "pve"
