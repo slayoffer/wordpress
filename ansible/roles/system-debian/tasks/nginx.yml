@@ -1,0 +1,44 @@
+---
+- name: Update APT package index
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install NGINX
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Ensure NGINX is running and enabled
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Install Certbot
+  community.general.snap:
+    name: certbot
+    classic: yes
+
+- name: Add link for Certbot
+  ansible.builtin.file:
+    src: /snap/bin/certbot
+    dest: /usr/bin/certbot
+    state: link
+
+- name: Create Nginx website conf from template
+  ansible.builtin.template:
+    src: "phpmyadmin.j2"
+    dest: "/etc/nginx/sites-available/{{ phpmyadmin_url }}"
+    mode: 0740
+
+- name: Create symlink for website conf
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ phpmyadmin_url }}"
+    dest: "/etc/nginx/sites-enabled/{{ phpmyadmin_url }}"
+    state: link
+
+- name: Reload Nginx
+  ansible.builtin.service:
+    name: nginx 
+    state: reloaded 

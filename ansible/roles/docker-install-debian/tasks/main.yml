@@ -1,0 +1,53 @@
+- name: "Ensure this role is running on Ubuntu/Debian"
+  assert:
+    that: ansible_os_family == "Debian"
+    msg: "This role only works for Ubuntu/Debian. To install Docker on Mac use GUI installer"
+
+- name: "Install Docker"
+  block:
+    - name: "Install requirements"
+      become: true
+      apt:
+        name: "{{ pre_docker_packages }}"
+        update_cache: yes
+        state: latest
+
+    # - name: "Add docker GPG key"
+    #   apt_key:
+    #     id: 0EBFCD88
+    #     url: https://download.docker.com/linux/ubuntu/gpg
+    #     state: present
+
+    # - name: "Add docker repo"
+    #   apt_repository:
+    #     repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu  {{ ansible_lsb.codename }}  stable"
+    #     state: present
+
+    - name: "Add Docker GPG key"
+      shell: 
+        cmd: |
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      become: true
+
+    - name: "Add Docker repo"
+      shell: 
+        cmd: |
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+      become: true
+
+    - name: "Install Docker-CE"
+      apt:
+        name: "{{ docker_packages }}"
+        update_cache: yes
+        state: latest
+
+    - name: "Add current User to the `docker` group"
+      # This allows to run the `docker` commands without having to use `sudo`
+      user:
+        name: "{{ username }}"
+        groups: docker
+        append: yes
+      become: true
+
+    - name: Reset ssh connection for changes to take effect
+      meta: "reset_connection"

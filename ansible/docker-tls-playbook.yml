@@ -1,0 +1,8 @@
+# THIS PLAYBOOK IS FOR ANSIBLE PUSH METHOD
+---
+- hosts: wp-master-1
+  become: true
+  roles:
+    - setup-secure-remote-docker-daemon-debian
+
+

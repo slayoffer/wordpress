@@ -1,0 +1,88 @@
+---
+- name: Create the script from the template
+  ansible.builtin.template:
+    src: docker-host-certs.j2
+    dest: "/home/{{ username }}/docker-host-certs.sh"
+    mode: 0755
+
+- name: "Create Certificates for Docker-host"
+  shell: "/home/{{ username }}/docker-host-certs.sh"
+  become_user: "{{ username }}"
+
+# - name: "Ensure required certs and keys are provided"
+#   assert: 
+#     that: "{{ item }} != \"\""
+#   with_items:
+#     - rootca_certificate
+#     - server_certificate
+#     - server_privatekey
+
+- name: "Ensure required certs and keys are provided"
+  assert: 
+    that: 
+      - "{{ item | default('') != '' }}"
+  with_items:
+    - "{{ rootca_certificate }}"
+    - "{{ server_certificate }}"
+    - "{{ server_privatekey }}"
+
+- name: "Remove certificate generation script from remote server"
+  file:
+    path: "/home/{{ username }}/docker-host-certs.sh"
+    state: absent
+
+- name: "Create Certificates directory for Docker"
+  file:
+    path: "{{ docker_certificates_dir }}"
+    state: directory
+  become: true
+
+- name: "Copy Private key"
+  copy:
+    src: "{{ server_privatekey }}"
+    dest: "{{ docker_certificates_dir }}/{{ privkey_filename }}"
+    remote_src: yes
+  become: true
+
+- name: "Copy Certificate"
+  copy:
+    src: "{{ server_certificate }}"
+    dest: "{{ docker_certificates_dir }}/{{ cert_filename }}"
+    remote_src: yes
+  become: true
+
+- name: "Copy RootCA (For client verification)"
+  copy:
+    src: "{{ rootca_certificate }}"
+    dest: "{{ docker_certificates_dir }}/{{ cacert_filename }}"
+    remote_src: yes
+  become: true
+
+- name: Change ownership of /etc/docker/ssl directory
+  ansible.builtin.file:
+    path: "/etc/docker/ssl"
+    owner: root
+    group: docker
+    recurse: yes
+
+- name: "Change permissions of /etc/docker/ssl directory"
+  ansible.builtin.file:
+    path: "/etc/docker/ssl"
+    mode: '0740'
+    recurse: yes
+  become: true
+
+- name: Find .pem files in .docker directory
+  ansible.builtin.find:
+    paths: "/home/{{ username }}/.docker"
+    patterns: "*.pem"
+  register: pem_files
+
+- name: Change ownership and permissions of .pem files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: '0700'
+  become: true
+  with_items: "{{ pem_files.files }}"

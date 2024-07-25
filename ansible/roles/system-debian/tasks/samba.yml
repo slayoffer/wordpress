@@ -1,0 +1,22 @@
+---
+- name: Create mount point directory
+  file:
+    path: "{{ samba_mount_point }}"
+    state: directory
+  become: true
+
+- name: Mount Samba share
+  mount:
+    fstype: cifs
+    src: "{{ samba_share }}"
+    path: "{{ samba_mount_point }}"
+    opts: "username={{ samba_username }},password={{ samba_password }},nounix,vers=3.0 0 0"
+    state: mounted
+  become: true
+
+- name: Add Samba share entry to fstab
+  lineinfile:
+    path: "/etc/fstab"
+    line: "{{ samba_share }} {{ samba_mount_point }} cifs username={{ samba_username }},password={{ samba_password }},nounix,vers=3.0 0 0"
+    state: present
+  become: true

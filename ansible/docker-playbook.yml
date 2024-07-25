@@ -1,0 +1,8 @@
+# THIS PLAYBOOK IS FOR ANSIBLE PUSH METHOD
+---
+- hosts: wp-master-1, wp-worker-1, wp-worker-2
+  become: true
+  roles:
+    - docker-install-debian
+
+

@@ -1,0 +1,75 @@
+services:
+  database:
+    image: mariadb:latest
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+      replicas: 1
+      restart_policy:
+        condition: any
+    command: [
+        '--default_authentication_plugin=mysql_native_password',
+        '--character-set-server=utf8mb4',
+        '--collation-server=utf8mb4_unicode_ci'
+    ]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    networks:
+      - backend-net
+    volumes:
+      - db-data:/var/lib/mysql
+
+  phpmyadmin:
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+      replicas: 1
+      restart_policy:
+        condition: any
+    environment:
+      - PMA_HOST=database
+      - UPLOAD_LIMIT=1024000000
+    image: phpmyadmin/phpmyadmin:latest
+    networks:
+      - backend-net
+    ports:
+      - 9000:80
+
+  wordpress:
+    image: ${IMAGE_NAME}
+    deploy:
+      mode: replicated
+      placement:
+        constraints:
+          - "node.role == worker"
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: any
+    environment:
+      WORDPRESS_DB_HOST: ${MYSQL_DB_HOST}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - 8000:80
+    networks:
+      - backend-net
+    volumes:
+      - wordpress-data:/var/www/html
+
+networks:
+  backend-net:
+    driver: overlay
+    attachable: true
+
+volumes:
+  db-data:
+  wordpress-data:

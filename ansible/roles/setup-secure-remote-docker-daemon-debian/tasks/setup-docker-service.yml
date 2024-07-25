@@ -1,0 +1,76 @@
+- name: "Create Overrides directory for Docker"
+  file:
+    path: /etc/systemd/system/docker.service.d/
+    state: directory
+  become: true
+
+- name: "Push the Docker daemon config to Server"
+  template:
+    src: daemon_startup_options.conf
+    dest: /etc/systemd/system/docker.service.d/override.conf
+  become: true
+
+- name: "Copy daemon.json config template"
+  template:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+  become: true
+
+- name: "Restart Docker Daemon service"
+  systemd:
+    name: docker
+    state: restarted
+    daemon_reload: yes
+  become: true
+
+- name: Fetch ca.pem from remote host
+  fetch:
+    src: "{{ user_docker_certificates_dir }}/{{ cacert_filename }}"
+    dest: "/home/slayo/dev_ubuntu/fesco/certs/"
+    flat: yes
+  become: true
+
+- name: Fetch cert.pem from remote host
+  fetch:
+    src: "{{ user_docker_certificates_dir }}/{{ client_cert_filename }}"
+    dest: "/home/slayo/dev_ubuntu/fesco/certs/"
+    flat: yes
+  become: true
+
+- name: Fetch key.pem from remote host
+  fetch:
+    src: "{{ user_docker_certificates_dir }}/{{ client_privkey_filename }}"
+    dest: "/home/slayo/dev_ubuntu/fesco/certs/"
+    flat: yes
+  become: true
+
+# - name: "Fetch the content of ca.pem"
+#   slurp:
+#     src: "{{ user_docker_certificates_dir }}/{{ cacert_filename }}"
+#   register: ca_pem_content
+#   become: true
+  
+# - name: "Fetch the content of cert.pem"
+#   slurp:
+#     src: "{{ user_docker_certificates_dir }}/{{ client_cert_filename }}"
+#   register: cert_pem_content
+#   become: true
+
+# - name: "Fetch the content of key.pem"
+#   slurp:
+#     src: "{{ user_docker_certificates_dir }}/{{ client_privkey_filename }}"
+#   register: key_pem_content
+#   become: true
+
+
+# - name: "Print the content of ca.pem without newlines"
+#   debug:
+#     msg: "{{ ca_pem_content['content'] | b64decode | replace('\n', '') }}"
+
+# - name: "Print the content of cert.pem without newlines"
+#   debug:
+#     msg: "{{ cert_pem_content['content'] | b64decode | replace('\n', '') }}"
+
+# - name: "Print the content of key.pem without newlines"
+#   debug:
+#     msg: "{{ key_pem_content['content'] | b64decode | replace('\n', '') }}"

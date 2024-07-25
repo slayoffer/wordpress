@@ -1,0 +1,10 @@
+# Required parameters
+cert_filename: server-cert.pem
+privkey_filename: server-key.pem
+cacert_filename: ca.pem
+client_privkey_filename: key.pem
+client_cert_filename: cert.pem
+
+rootca_certificate: "{{ user_docker_certificates_dir }}/{{ cacert_filename }}"
+server_certificate: "{{ user_docker_certificates_dir }}/{{ cert_filename }}"
+server_privatekey: "{{ user_docker_certificates_dir }}/{{ privkey_filename }}"

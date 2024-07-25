@@ -1,0 +1,9 @@
+# THIS PLAYBOOK IS FOR ANSIBLE PUSH METHOD
+---
+
+- hosts: wp-nginx
+  become: true
+  roles:
+    - system-debian
+
+

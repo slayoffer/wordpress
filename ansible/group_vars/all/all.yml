@@ -1,0 +1,36 @@
+#TODO: SET REMOTE USERNAME, REMOTE SERVER DOMAIN NAMES AND IPS - USED FOR DOCKER TLS CERTS AND ANSIBLE INVENTORY FILE
+remote_server_fqdn: "wordpress"
+remote_server_shortname: "wp-master-1"
+remote_server_public_ip: "192.168.3.40"
+remote_server_local_ip: "46.37.140.217"
+username: "ubuntu"
+
+#TODO: SET TLS SERVER CERT PASSWORD
+certificate_password: '{{ certificate_password }}'
+
+#! PRIVILEGE ESCALATION SECTION - CHANGE ONLY IF NEEDED !!!
+# ansible_become: true
+# ansible_become_user: "{{ username }}"
+# ansible_become_method: sudo
+
+#! CHANGE DOCKER TLS PORT ONLY IF NEEDED !!!
+docker_port: '{{ docker_port }}'
+
+#! CHANGE REMOTE SERVER SSH PORT ONLY IF NEEDED !!!
+remote_server_ssh_port: "2222"
+
+#! CHANGE USER LOCAL CERTIFICATES FOLDER ONLY IF NEEDED !!!
+user_docker_certificates_dir: "/home/{{ username }}/.docker"
+
+#! CHANGE DOCKER DEFAULT CERTIFICATES FOLDER ONLY IF NEEDED !!!
+docker_certificates_dir: "/etc/docker/ssl"
+
+#! USED FOR USER & SSH CONFIGURATION TASKS, CHANGE ONLY IF TASKS ARE USED
+local_username: "ubuntu"
+local_username_password: '{{ local_username_password }}'
+
+#! CHANGE SAMBA SHARE CREDENTIALS IF TASK IS USED
+samba_share: //server-samba.com/letsencryptstore$
+samba_mount_point: /certs
+samba_username: sslservice
+samba_password: '{{ samba_password }}'
